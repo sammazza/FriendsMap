@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friends</title>
+
+    <!-- Leaflet MAPS CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+        
+    <style>
+        body {
+            height: 100%;
+            margin: 0;
+            box-sizing: border-box;
+            /* make calcualtion not includnig border */
+        }
+
+        .main {
+            display: flex;
+            flex-direction: row;
+            height: 98vh;
+            padding: 1% 1% 0% 1%;
+            /* T R B L - trouble */
+            background-color: aliceblue;
+        }
+
+        .left {
+            border: 3px solid gray;
+            display: flex;
+            flex-direction: column;
+            width: 30%;
+            background-color: burlywood;
+        }
+
+        .map {
+            border: 3px solid grey;
+            width: 70%;
+            background-color: gainsboro;
+        }
+
+        .green {
+            color: green;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="main">
+        <div class="left">
+            <div class="green">
+                <h1>Friends Location</h1>
+            </div>
+            <div class="countries">
+                <ul>
+                    <li>🔥 Israel</li> <!-- Window+. open Emoji -->
+                    <li> Italy</li>
+                    <li> Spain</li>
+                    <li> USA</li>
+                </ul>
+            </div>
+            <div>
+                <form>
+                    <input type="text" id="fullname" placeholder="fullname">
+                    <input type="text" id="address" placeholder="address">
+                </form>
+            </div>
+            <div>
+                <h1 class="green">My Friends Address</h1>
+            </div>
+            <div>
+                <!-- Dynamic list from Firebase -->
+                <ul>
+                    <li>friend 1</li>
+                    <li>friend 2</li>
+                </ul>
+            </div>
+        </div>
+        <div class="map" id="map"> <!-- must have ID MAP to display maps -->
+            <h1> Map</h1>
+        </div>
+    </div>
+    <script>
+        // not using GoogleMaps.  So we don't have access to all the info that google has 
+        // geolocator accepts a function that takes the current-position as a parameter
+        // use navigator to get my location
+        // then use leaflet to show map around my location
+
+        let fullname = document.getElementById("fullname");
+        let address = document.getElementById("address");
+        let markers = [];
+        let map;
+
+        navigator.geolocation.getCurrentPosition((position) => {
+            console.log(position);
+            let { latitude, longitude } = position.coords;
+            let url = `https://www.google.com/maps/place/Tel+Aviv-Yafo/@${latitude},${longitude},13z`
+            console.log(url);
+
+            /* Leftlet  JS API for maps leafletjs.com */
+            /* map is a global variable */
+            map = L.map('map').setView([51.505, -0.09], 13);
+            /* Read DOC there are many options like: showing maps use FR extension https://tile.openstreetmap.fr */ 
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            map.on("click", function(mapEvent){
+                /* get lat:lng of click on map and add a marker */
+                console.log(mapEvent);
+                const {lat, lng} = mapEvent.latlng;
+                addMarker(lat, lng, fullname.value);
+            });
+
+            
+            /*L.marker([51.5, -0.09]).addTo(map) London Lat:Log*/
+            L.marker([latitude, longitude])
+                .addTo(map)
+                .bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
+                .openPopup();
+        },
+        function () {
+            alert("Failed to get map location")
+        });
+
+        /* function to add a marker to map after click on map */
+        function addMarker(lat, lng, name)
+        {
+            const marker = L.marker([lat, lng]);
+                marker.addTo(map);
+                marker.bindPopup(name);
+                //marker.openPopup();
+                markers.push({marker, fullname: name});
+                console.log(markers);
+        }
+    </script>
+</body>
+
+</html>
